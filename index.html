@@ -9,7 +9,7 @@
             --rbc: #c62828; --cell: #fff3e0; --nucleus: #a1887f;
             --panel: #263238; --heart-red: #d32f2f; --muscle-dark: #b71c1c; --vessel-gray: #9e9e9e;
             --glucose: #ffd54f; --amino: #81c784;
-            --lymph: #fff59d; /* 新增淋巴液顏色 */
+            --lymph: #fff59d;
             --ai-primary: #673ab7;
         }
         body { font-family: "PingFang TC", "Helvetica", sans-serif; background: #eceff1; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
@@ -45,22 +45,24 @@
         .water { background: var(--water); box-shadow: 0 0 4px var(--water); }
         .glucose { background: var(--glucose); border-radius: 2px; }
         .amino { background: var(--amino); }
-        .lymph-p { background: #fbc02d; box-shadow: 0 0 3px #fbc02d; } /* 淋巴液粒子 */
+        .lymph-p { background: #fbc02d; box-shadow: 0 0 3px #fbc02d; }
 
         .legend-bar { margin-top: 15px; display: flex; justify-content: center; gap: 25px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.85em; }
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        /* AI Chatbot Styles保持不變 */
+        /* AI Chatbot Styles */
         #ai-button { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--ai-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px; transition: 0.3s; }
-        #ai-button:hover { transform: scale(1.1); }
-        #ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
+        #ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 380px; height: 550px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
         .chat-header { background: var(--ai-primary); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9em; background: #f9f9f9; }
-        .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .chat-input-area input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        .ai-msg { background: #e1bee7; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-start; max-width: 80%; }
-        .user-msg { background: #cfd8dc; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-end; max-width: 80%; margin-left: auto; }
+        .chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9em; background: #fdfbff; display: flex; flex-direction: column; gap: 10px; }
+        .chat-input-area { padding: 12px; border-top: 1px solid #eee; display: flex; gap: 8px; background: white; }
+        .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; padding-left: 15px; }
+        .ai-msg { background: #f3e5f5; color: #4a148c; padding: 10px 14px; border-radius: 15px 15px 15px 2px; align-self: flex-start; max-width: 85%; border: 1px solid #e1bee7; line-height: 1.4; }
+        .user-msg { background: #e3f2fd; color: #0d47a1; padding: 10px 14px; border-radius: 15px 15px 2px 15px; align-self: flex-end; max-width: 85%; border: 1px solid #bbdefb; }
+        .suggest-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .chip { font-size: 0.8em; background: white; border: 1px solid var(--ai-primary); color: var(--ai-primary); padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .chip:hover { background: var(--ai-primary); color: white; }
     </style>
 </head>
 <body>
@@ -112,7 +114,7 @@
                 <span id="hp-entry" class="gauge-val">35</span>
             </div>
             <div class="gauge-box" style="border-color: #03a9f4;">
-                <span style="font-size: 0.75em;">血漿滲透壓 Plasma OP</span>
+                <span style="font-size: 0.75em;">血漿蛋白滲透效應 Plasma OP</span>
                 <span class="gauge-val">25</span>
             </div>
             <div class="gauge-box">
@@ -138,24 +140,36 @@
             <div class="legend-item"><div class="dot" style="background:var(--water);"></div> 水分子 Water</div>
             <div class="legend-item"><div class="dot" style="background:var(--glucose);"></div> 葡萄糖 Glucose</div>
             <div class="legend-item"><div class="dot" style="background:var(--amino);"></div> 氨基酸 Amino acid</div>
-            <div class="legend-item"><div class="dot" style="background:#fbc02d;"></div> 淋巴液 Lymph</div> </div>
+            <div class="legend-item"><div class="dot" style="background:#fbc02d;"></div> 淋巴液 Lymph</div>
+        </div>
     </div>
 </div>
 
 <div id="ai-button" onclick="toggleChat()">🤖</div>
 <div id="ai-chat-window">
-    <div class="chat-header"><span>AI 助手</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
+    <div class="chat-header">
+        <span>DSE Bio Learning Assistant</span>
+        <span onclick="toggleChat()" style="cursor:pointer">✖</span>
+    </div>
     <div class="chat-content" id="chat-box">
-        <div class="ai-msg">你好！我是你的助手。有什麼關於心臟、淋巴或組織液的問題嗎？<br>Hello! I'm your assistant. Any questions about the heart, lymph, or tissue fluid?</div>
+        <div class="ai-msg">
+            你好！我是你的生物科學習助手。觀察模擬器後，你可以問我關於心臟活動、組織液形成或水腫的問題。<br>
+            Hello! I'm your Bio assistant. You can ask me about heart activity, tissue fluid, or oedema.
+            <div class="suggest-chips">
+                <div class="chip" onclick="quickAsk('水腫成因')">水腫成因?</div>
+                <div class="chip" onclick="quickAsk('靜水壓與滲透壓')">HP vs OP?</div>
+                <div class="chip" onclick="quickAsk('淋巴的作用')">淋巴作用?</div>
+            </div>
+        </div>
     </div>
     <div class="chat-input-area">
-        <input type="text" id="user-input" placeholder="Type here...">
-        <button onclick="sendMessage()" style="background:var(--ai-primary); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Send</button>
+        <input type="text" id="user-input" placeholder="問問我... Ask me something..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" style="background:var(--ai-primary); color:white; border:none; padding:8px 15px; border-radius:20px; cursor:pointer; font-weight:bold;">傳送</button>
     </div>
 </div>
 
 <script>
-    // --- 原有心臟邏輯保持不變 ---
+    /* ---------------- 原有模擬器邏輯 (保持不變) ---------------- */
     let hr = 70, sv = 70, arteryHP = 35;
     const heartSvg = document.getElementById('heart-svg');
     const heartBody = document.getElementById('ventricle-body');
@@ -202,7 +216,6 @@
     document.getElementById('hr-slider').oninput = function() { hr=this.value; document.getElementById('hr-disp').innerText=hr; updateCO(); };
     document.getElementById('sv-slider').oninput = function() { sv=this.value; document.getElementById('sv-disp').innerText=sv; updateCO(); };
 
-    // --- 組織液與淋巴邏輯 (核心修改處) ---
     const viewport = document.getElementById('viewport');
     const paths = [0,1,2,3,4].map(i => document.getElementById('path'+i));
     let particles = [];
@@ -217,7 +230,6 @@
         const el = document.createElement('div'); el.className = `p ${type}`;
         if (type !== 'rbc') el.classList.add('mol');
         viewport.appendChild(el);
-        // exited: 是否離開血管；inLymph: 是否進入淋巴
         return { el, type, pIdx, progress: 0, exited: false, inLymph: false, drift: 0, side: Math.random() > 0.5 ? 1 : -1 };
     }
 
@@ -227,81 +239,107 @@
             let r = Math.random();
             particles.push(createP(r < 0.7 ? 'water' : (r < 0.88 ? 'glucose' : 'amino')));
         }
-
         particles.forEach((p, i) => {
-            // 如果粒子已進入淋巴管，改走淋巴路徑（由左向右穩定移動）
             if (p.inLymph) {
                 let currentX = parseFloat(p.el.style.left) || 100;
                 let nextX = currentX + 1.2;
                 p.el.style.left = nextX + 'px';
-                p.el.style.top = '420px'; // 淋巴管中心高度
-                
-                // 淋巴粒子流出視窗，移除
+                p.el.style.top = '420px';
                 if (nextX > 1180) { p.el.remove(); particles.splice(i, 1); }
                 return;
             }
-
             let localHP = arteryHP - (p.progress * 20);
             p.progress += (p.progress < 0.15) ? 0.006 * (arteryHP/35) : (p.progress > 0.85 ? 0.004 : 0.0018);
             const pt = paths[p.pIdx].getPointAtLength(p.progress * paths[p.pIdx].getTotalLength());
             let x = pt.x, y = pt.y;
-
             if (p.type !== 'rbc') {
-                // 動脈端：推力 (HP > OP) 導致溢出
                 if (p.progress > 0.2 && p.progress < 0.45 && !p.exited && Math.random() < ((localHP-25)*0.015)) p.exited = true;
-                
                 if (p.exited) {
-                    // 溢出血管後的垂直偏離
                     if (p.progress < 0.65) p.drift = Math.min(p.drift + (localHP/7), 90);
                     y += p.drift * p.side;
-
-                    //核心修改：少部分組織液（水分子）進入淋巴管
-                    // 如果水分子向下方偏移 (side=1) 且進度在中後段，有機率進入淋巴管 (機率約 10%)
                     if (y > 400 && p.side === 1 && p.type === 'water' && Math.random() < 0.1) {
-                        p.inLymph = true;
-                        p.drift = 0; // 歸位到淋巴管高度
-                        p.el.classList.add('lymph-p'); // 改變顏色
-                        p.el.style.top = '420px';
-                        p.el.style.left = x + 'px';
+                        p.inLymph = true; p.drift = 0; p.el.classList.add('lymph-p');
+                        p.el.style.top = '420px'; p.el.style.left = x + 'px';
                     }
-
-                    // 靜脈端：重吸收 (即使溢出，機率也會隨滲透壓降低)
                     if (p.exited && !p.inLymph && p.progress > 0.75) {
                         p.drift *= 0.85; if (Math.abs(p.drift) < 1.5) p.exited = false;
                     }
                 }
             }
-            // 淋巴外的粒子正常更新位置
-            if(!p.inLymph) {
-                p.el.style.left = x + 'px'; p.el.style.top = y + 'px';
-            }
+            if(!p.inLymph) { p.el.style.left = x + 'px'; p.el.style.top = y + 'px'; }
             if (p.progress >= 1) { p.el.remove(); particles.splice(i, 1); }
         });
         requestAnimationFrame(animate);
     }
+    updateCO(); beat(); animate();
 
-    // --- AI Chatbot 雙語邏輯保持不變 ---
-    function toggleChat() { const c = document.getElementById('ai-chat-window'); c.style.display = (c.style.display==='flex'?'none':'flex'); }
+    /* ---------------- 修改後的 AI Chatbot 邏輯 (自主學習強化版) ---------------- */
+    
+    const responses = [
+        {
+            keys: ['水腫', 'oedema', 'swelling', '腫'],
+            ans: "<b>水腫 (Oedema)</b> 的主要成因是組織液積聚過量。常見原因：<br>1. <b>血漿蛋白減少</b> (如營養不良)，導致靜脈端『吸力』(OP) 減弱。<br>2. <b>淋巴管阻塞</b>，無法回收剩餘液體。<br>3. <b>血壓過高</b>，令動脈端『推力』(HP) 太強。"
+        },
+        {
+            keys: ['hp', 'op', '壓力', 'pressure', '靜水壓', '滲透'],
+            ans: "在微血管交換中，有兩股力量：<br>1. <b>靜水壓 (HP)</b>: 心臟產生的推力，在動脈端較高，把水分『逼出』血管。<br>2. <b>血漿蛋白滲透效應 (OP)</b>: 血漿蛋白產生的吸力，全段恆定，在靜脈端將水分『吸回』。"
+        },
+        {
+            keys: ['淋巴', 'lymph'],
+            ans: "<b>淋巴系統</b>是防止水腫的重要角色！它負責回收約 10% 未能被靜脈重吸收的組織液。你可以觀察模擬器最下方淺黃色的管道，水分進入後會變黃色粒子單向流動。"
+        },
+        {
+            keys: ['運動', 'exercise', '心跳'],
+            ans: "運動時，心率 (HR) 和心搏量 (SV) 增加，導致<b>心輸出量 (CO)</b> 大升。這會顯著提高微血管的<b>靜水壓 (HP)</b>，導致更多組織液生成。這就是為什麼運動後肌肉會感到充血腫脹！"
+        },
+        {
+            keys: ['rbc', '紅血球', '蛋白', 'protein'],
+            ans: "紅血球和血漿蛋白體積較大，無法穿過微血管壁的<b>差異透性 (Differential permeability)</b> 膜。因此它們留在血管內，蛋白質負責維持滲透壓，確保水分能被重吸收。"
+        }
+    ];
+
+    function toggleChat() { 
+        const c = document.getElementById('ai-chat-window'); 
+        c.style.display = (c.style.display==='flex'?'none':'flex'); 
+    }
+
+    function handleKeyPress(e) { if(e.key === 'Enter') sendMessage(); }
+
+    function quickAsk(text) {
+        document.getElementById('user-input').value = text;
+        sendMessage();
+    }
+
     function sendMessage() {
         const input = document.getElementById('user-input');
         const box = document.getElementById('chat-box');
-        if(!input.value) return;
-        const userDiv = document.createElement('div');
-        userDiv.className = 'user-msg'; userDiv.innerText = input.value;
-        box.appendChild(userDiv);
-        const aiDiv = document.createElement('div');
-        aiDiv.className = 'ai-msg';
-        
-        const val = input.value.toLowerCase();
-        let reply = " Interesting question! Focus on HP vs OP, or how lymph drains. / 很有趣！請關注靜水壓與滲透壓的對抗，或淋巴如何收集液體。";
-        if(val.includes('運動') || val.includes('exercise')) reply = " Exercise increases HP, causing more fluid leakage. / 運動增加靜水壓，導致組織液滲出增加。";
-        if(val.includes('淋巴') || val.includes('lymph')) reply = " Lymphatics collect excess fluid and return it to the blood. / 淋巴管收集多餘組織液並將其送回血液。";
-        aiDiv.innerText = reply;
-        setTimeout(() => { box.appendChild(aiDiv); box.scrollTop = box.scrollHeight; }, 600);
-        input.value = '';
-    }
+        const text = input.value.trim();
+        if(!text) return;
 
-    updateCO(); beat(); animate();
+        // User Message
+        const uDiv = document.createElement('div');
+        uDiv.className = 'user-msg';
+        uDiv.innerText = text;
+        box.appendChild(uDiv);
+        input.value = '';
+
+        // AI Logic
+        setTimeout(() => {
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'ai-msg';
+            
+            let found = responses.find(r => r.keys.some(k => text.toLowerCase().includes(k)));
+            
+            if(found) {
+                aiDiv.innerHTML = found.ans;
+            } else {
+                aiDiv.innerHTML = "我不太明白這個問題。你可以試著問我關於：<b>靜水壓 (HP)、水腫成因、淋巴管作用</b> 或 <b>運動對血壓的影響</b>。";
+            }
+            
+            box.appendChild(aiDiv);
+            box.scrollTop = box.scrollHeight;
+        }, 500);
+    }
 </script>
 </body>
 </html>
