@@ -2,14 +2,14 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>DSE Biology: Integrated Capillary Exchange Lab</title>
+    <title>DSE Biology: Integrated Cardiac & Tissue Fluid Lab</title>
     <style>
         :root {
             --artery: #ef5350; --vein: #42a5f5; --water: #00e5ff;
             --rbc: #c62828; --cell: #fff3e0; --nucleus: #a1887f;
             --panel: #263238; --heart-red: #d32f2f; --muscle-dark: #b71c1c; --vessel-gray: #9e9e9e;
             --glucose: #ffd54f; --amino: #81c784;
-            --lymph: #fff59d;
+            --lymph: #fff59d; /* 新增淋巴液顏色 */
             --ai-primary: #673ab7;
         }
         body { font-family: "PingFang TC", "Helvetica", sans-serif; background: #eceff1; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
@@ -45,21 +45,22 @@
         .water { background: var(--water); box-shadow: 0 0 4px var(--water); }
         .glucose { background: var(--glucose); border-radius: 2px; }
         .amino { background: var(--amino); }
-        .lymph-p { background: #fbc02d; box-shadow: 0 0 3px #fbc02d; }
+        .lymph-p { background: #fbc02d; box-shadow: 0 0 3px #fbc02d; } /* 淋巴液粒子 */
 
         .legend-bar { margin-top: 15px; display: flex; justify-content: center; gap: 25px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.85em; }
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        /* AI Chatbot Styles */
+        /* AI Chatbot Styles保持不變 */
         #ai-button { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--ai-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px; transition: 0.3s; }
-        #ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 380px; height: 550px; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
+        #ai-button:hover { transform: scale(1.1); }
+        #ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
         .chat-header { background: var(--ai-primary); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.95em; background: #fdfdfd; display: flex; flex-direction: column; }
-        .chat-input-area { padding: 12px; border-top: 1px solid #eee; display: flex; gap: 8px; background: white; }
-        .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
-        .ai-msg { background: #f3e5f5; color: #4a148c; padding: 10px 14px; border-radius: 15px 15px 15px 2px; margin-bottom: 12px; align-self: flex-start; max-width: 85%; line-height: 1.4; border: 1px solid #e1bee7; }
-        .user-msg { background: #e3f2fd; color: #0d47a1; padding: 10px 14px; border-radius: 15px 15px 2px 15px; margin-bottom: 12px; align-self: flex-end; max-width: 85%; border: 1px solid #bbdefb; }
+        .chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9em; background: #f9f9f9; }
+        .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
+        .chat-input-area input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .ai-msg { background: #e1bee7; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-start; max-width: 80%; }
+        .user-msg { background: #cfd8dc; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-end; max-width: 80%; margin-left: auto; }
     </style>
 </head>
 <body>
@@ -74,10 +75,13 @@
                 <path class="vessels" d="M90,20 Q115,0 140,20 L140,80 L90,80 Z" /> 
                 <path class="vessels" d="M70,40 Q50,30 40,50 L60,95 L80,85 Z" /> 
                 <path id="ventricle-body" class="heart-muscle" d="M65,80 L145,80 C165,80 185,120 165,190 C150,240 105,250 105,250 C105,250 60,240 45,190 C25,120 45,80 65,80 Z" />
+                <path d="M65,80 Q105,65 145,80" fill="none" stroke="#b71c1c" stroke-width="3"/>
             </svg>
             <div style="position: absolute; right: 50px; top: 50px; text-align: right; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
-                狀態 Status:<br> <b id="heart-state" style="color: var(--heart-red); font-size: 1.1em;">舒張期 Diastole</b><br><br>
-                心輸出量 C.O.:<br> <span id="co-val" style="font-weight: bold; font-size: 1.2em;">4.9</span> L/min
+                狀態 Status:<br> 
+                <b id="heart-state" style="color: var(--heart-red); font-size: 1.1em;">舒張期 Diastole</b><br><br>
+                心輸出量 Cardiac Output:<br>
+                <span id="co-val" style="font-weight: bold; font-size: 1.2em;">4.9</span> L/min
             </div>
         </div>
         <div class="control-panel">
@@ -86,29 +90,29 @@
                 <button class="preset-btn" onclick="setPreset(140, 110, this)">運動 Exercise</button>
             </div>
             <div style="flex: 1;">
-                <label>心率 HR: <b id="hr-disp">70</b> bpm</label>
+                <label>心率 Heart Rate (HR): <b id="hr-disp">70</b> bpm</label>
                 <input type="range" id="hr-slider" min="40" max="180" value="70" style="width: 100%;">
             </div>
             <div style="flex: 1;">
-                <label>心搏量 SV: <b id="sv-disp">70</b> ml</label>
+                <label>心搏量 Stroke Volume (SV): <b id="sv-disp">70</b> ml</label>
                 <input type="range" id="sv-slider" min="30" max="150" value="70" style="width: 100%;">
             </div>
             <div class="gauge-box" style="border-color: #ff5252;">
-                <span style="font-size: 0.75em;">動脈血壓 BP</span>
+                <span style="font-size: 0.75em;">動脈血壓 Arterial BP</span>
                 <span id="bp-result" class="gauge-val">35</span>
             </div>
         </div>
     </div>
 
     <div class="section-card">
-        <div class="part-header">第二部分：物質交換與淋巴 Capillary Exchange & Lymph</div>
+        <div class="part-header">第二部分：組織液與淋巴 Tissue Fluid & Lymphatics</div>
         <div class="control-panel" style="background: #37474f;">
             <div class="gauge-box">
                 <span style="font-size: 0.75em;">動脈端靜水壓 Entry HP</span>
                 <span id="hp-entry" class="gauge-val">35</span>
             </div>
             <div class="gauge-box" style="border-color: #03a9f4;">
-                <span style="font-size: 0.75em;">血漿蛋白滲透效應 Osmotic Effect</span>
+                <span style="font-size: 0.75em;">血漿滲透壓 Plasma OP</span>
                 <span class="gauge-val">25</span>
             </div>
             <div class="gauge-box">
@@ -121,6 +125,7 @@
             <svg class="vessel-svg" viewBox="0 0 1240 450">
                 <path d="M100,420 L1140,420" stroke="rgba(255,245,157,0.5)" stroke-width="20" stroke-linecap="round" fill="none" />
                 <text x="110" y="440" fill="#fbc02d" font-size="12" font-weight="bold">淋巴管 Lymphatic Vessel</text>
+                
                 <path id="path0" d="M0,225 L180,225 C350,50 890,50 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
                 <path id="path1" d="M0,225 L180,225 C350,140 890,140 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
                 <path id="path2" d="M0,225 L180,225 L1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
@@ -132,25 +137,25 @@
             <div class="legend-item"><div class="dot" style="background:var(--rbc);"></div> 紅血球 RBC</div>
             <div class="legend-item"><div class="dot" style="background:var(--water);"></div> 水分子 Water</div>
             <div class="legend-item"><div class="dot" style="background:var(--glucose);"></div> 葡萄糖 Glucose</div>
-            <div class="legend-item"><div class="dot" style="background:#fbc02d;"></div> 淋巴液 Lymph</div>
-        </div>
+            <div class="legend-item"><div class="dot" style="background:var(--amino);"></div> 氨基酸 Amino acid</div>
+            <div class="legend-item"><div class="dot" style="background:#fbc02d;"></div> 淋巴液 Lymph</div> </div>
     </div>
 </div>
 
 <div id="ai-button" onclick="toggleChat()">🤖</div>
 <div id="ai-chat-window">
-    <div class="chat-header"><span>Biology AI 助教</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
+    <div class="chat-header"><span>AI 助手</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
     <div class="chat-content" id="chat-box">
-        <div class="ai-msg">你好！我是你的自主學習助手。你可以問我關於血管適應特徵、粒子穿透、或水腫的問題！<br>Hello! I'm your AI Tutor. Ask me about vessel adaptations, particle exchange, or oedema!</div>
+        <div class="ai-msg">你好！我是你的助手。有什麼關於心臟、淋巴或組織液的問題嗎？<br>Hello! I'm your assistant. Any questions about the heart, lymph, or tissue fluid?</div>
     </div>
     <div class="chat-input-area">
-        <input type="text" id="user-input" placeholder="輸入問題... (e.g. 為什麼紅血球不能離開？)" onkeypress="if(event.keyCode===13) sendMessage()">
-        <button onclick="sendMessage()" style="background:var(--ai-primary); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">傳送</button>
+        <input type="text" id="user-input" placeholder="Type here...">
+        <button onclick="sendMessage()" style="background:var(--ai-primary); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Send</button>
     </div>
 </div>
 
 <script>
-    // --- 核心變量與心臟邏輯 ---
+    // --- 原有心臟邏輯保持不變 ---
     let hr = 70, sv = 70, arteryHP = 35;
     const heartSvg = document.getElementById('heart-svg');
     const heartBody = document.getElementById('ventricle-body');
@@ -182,8 +187,14 @@
         let cycle = 60000 / hr;
         heartBody.style.transition = "d 0.12s cubic-bezier(0.4, 0, 0.2, 1)";
         heartBody.setAttribute('d', `M78,80 L132,80 C145,80 160,120 150,190 C140,220 105,235 105,235 C105,235 70,220 60,190 C50,120 65,80 78,80 Z`);
+        heartSvg.style.transform = "scale(0.96) translateY(5px)";
+        heartStateTxt.innerHTML = "收縮期 Systole";
+        heartStateTxt.style.color = "#d32f2f";
         setTimeout(() => {
             heartBody.setAttribute('d', `M65,80 L145,80 C165,80 185,120 165,190 C150,240 105,250 105,250 C105,250 60,240 45,190 C25,120 45,80 65,80 Z`);
+            heartSvg.style.transform = "scale(1) translateY(0px)";
+            heartStateTxt.innerHTML = "舒張期 Diastole";
+            heartStateTxt.style.color = "#455a64";
         }, cycle * 0.35);
         setTimeout(beat, cycle);
     }
@@ -191,7 +202,7 @@
     document.getElementById('hr-slider').oninput = function() { hr=this.value; document.getElementById('hr-disp').innerText=hr; updateCO(); };
     document.getElementById('sv-slider').oninput = function() { sv=this.value; document.getElementById('sv-disp').innerText=sv; updateCO(); };
 
-    // --- 物質交換粒子模擬 ---
+    // --- 組織液與淋巴邏輯 (核心修改處) ---
     const viewport = document.getElementById('viewport');
     const paths = [0,1,2,3,4].map(i => document.getElementById('path'+i));
     let particles = [];
@@ -206,6 +217,7 @@
         const el = document.createElement('div'); el.className = `p ${type}`;
         if (type !== 'rbc') el.classList.add('mol');
         viewport.appendChild(el);
+        // exited: 是否離開血管；inLymph: 是否進入淋巴
         return { el, type, pIdx, progress: 0, exited: false, inLymph: false, drift: 0, side: Math.random() > 0.5 ? 1 : -1 };
     }
 
@@ -215,93 +227,113 @@
             let r = Math.random();
             particles.push(createP(r < 0.7 ? 'water' : (r < 0.88 ? 'glucose' : 'amino')));
         }
+
         particles.forEach((p, i) => {
+            // 如果粒子已進入淋巴管，改走淋巴路徑（由左向右穩定移動）
             if (p.inLymph) {
                 let currentX = parseFloat(p.el.style.left) || 100;
                 let nextX = currentX + 1.2;
-                p.el.style.left = nextX + 'px'; p.el.style.top = '420px';
+                p.el.style.left = nextX + 'px';
+                p.el.style.top = '420px'; // 淋巴管中心高度
+                
+                // 淋巴粒子流出視窗，移除
                 if (nextX > 1180) { p.el.remove(); particles.splice(i, 1); }
                 return;
             }
+
             let localHP = arteryHP - (p.progress * 20);
             p.progress += (p.progress < 0.15) ? 0.006 * (arteryHP/35) : (p.progress > 0.85 ? 0.004 : 0.0018);
             const pt = paths[p.pIdx].getPointAtLength(p.progress * paths[p.pIdx].getTotalLength());
             let x = pt.x, y = pt.y;
+
             if (p.type !== 'rbc') {
+                // 動脈端：推力 (HP > OP) 導致溢出
                 if (p.progress > 0.2 && p.progress < 0.45 && !p.exited && Math.random() < ((localHP-25)*0.015)) p.exited = true;
+                
                 if (p.exited) {
+                    // 溢出血管後的垂直偏離
                     if (p.progress < 0.65) p.drift = Math.min(p.drift + (localHP/7), 90);
                     y += p.drift * p.side;
+
+                    //核心修改：少部分組織液（水分子）進入淋巴管
+                    // 如果水分子向下方偏移 (side=1) 且進度在中後段，有機率進入淋巴管 (機率約 10%)
                     if (y > 400 && p.side === 1 && p.type === 'water' && Math.random() < 0.1) {
-                        p.inLymph = true; p.el.classList.add('lymph-p');
+                        p.inLymph = true;
+                        p.drift = 0; // 歸位到淋巴管高度
+                        p.el.classList.add('lymph-p'); // 改變顏色
+                        p.el.style.top = '420px';
+                        p.el.style.left = x + 'px';
                     }
+
+                    // 靜脈端：重吸收 (即使溢出，機率也會隨滲透壓降低)
                     if (p.exited && !p.inLymph && p.progress > 0.75) {
                         p.drift *= 0.85; if (Math.abs(p.drift) < 1.5) p.exited = false;
                     }
                 }
             }
-            if(!p.inLymph) { p.el.style.left = x + 'px'; p.el.style.top = y + 'px'; }
+            // 淋巴外的粒子正常更新位置
+            if(!p.inLymph) {
+                p.el.style.left = x + 'px'; p.el.style.top = y + 'px';
+            }
             if (p.progress >= 1) { p.el.remove(); particles.splice(i, 1); }
         });
         requestAnimationFrame(animate);
     }
 
-    // --- 強化版 AI Chatbot 自主學習邏輯 ---
-    function toggleChat() { 
-        const c = document.getElementById('ai-chat-window'); 
-        c.style.display = (c.style.display==='flex'?'none':'flex'); 
+   // --- AI Chatbot 邏輯修改：自主學習引導版 ---
+function sendMessage() {
+    const input = document.getElementById('user-input');
+    const box = document.getElementById('chat-box');
+    const userText = input.value.trim().toLowerCase();
+    
+    if(!userText) return;
+
+    // 顯示用戶訊息
+    const userDiv = document.createElement('div');
+    userDiv.className = 'user-msg';
+    userDiv.innerText = input.value;
+    box.appendChild(userDiv);
+    
+    // 清空輸入框
+    input.value = '';
+
+    // AI 回應邏輯
+    let reply = "";
+
+    // 1. 針對「一層細胞厚度 / 擴散距離」
+    if (userText.includes('一層') || userText.includes('厚度') || userText.includes('one cell thick') || userText.includes('distance')) {
+        reply = "💡 這是微血管重要的適應特徵！微血管壁只有一層細胞厚，可以「縮短擴散距離」，從而「增加物質交換的速率」。\n\nThis shortens the diffusion distance and increases the rate of material exchange.";
+    }
+    // 2. 針對「紅血球 / 差異透性 / 體積」
+    else if (userText.includes('紅血球') || userText.includes('rbc') || userText.includes('不能離開') || userText.includes('體積')) {
+        reply = "🔍 關鍵在於「差異透性 (Differential permeability)」。紅血球體積太大，無法通過微血管壁的孔徑；而水分子和葡萄糖體積細小，則可以通過。\n\nRBCs are too large to pass through. The capillary wall is differentially permeable, allowing only small molecules to pass.";
+    }
+    // 3. 針對「哪些粒子能穿過 / 水 / 葡萄糖」
+    else if (userText.includes('哪些粒子') || userText.includes('穿過') || userText.includes('pass through')) {
+        reply = "🧪 根據模擬器觀察，細小分子如「水分子 (Water)」、「葡萄糖 (Glucose)」及「氨基酸 (Amino acids)」都能穿過微血管壁進入組織空間。\n\nSmall molecules like water, glucose, and amino acids can pass through.";
+    }
+    // 4. 針對「留在血管 / 血漿蛋白」
+    else if (userText.includes('留在血管') || userText.includes('stay inside') || userText.includes('血漿蛋白')) {
+        reply = "🩸 除了紅血球，大的「血漿蛋白 (Plasma proteins)」也會留在血管內。它們對靜脈端的「滲透重吸收」非常重要喔！\n\nLarge plasma proteins also stay inside, which are crucial for reabsorption.";
+    }
+    // 5. 針對「水腫 / 炎症」
+    else if (userText.includes('水腫') || userText.includes('oedema') || userText.includes('發炎')) {
+        reply = "⚠️ 當發生炎症時，微血管的透性會增加，使血漿蛋白滲出，導致靜脈端的吸力減弱，水分積聚形成「水腫」。\n\nIncreased permeability during inflammation causes protein leakage and oedema.";
+    }
+    // 默認引導
+    else {
+        reply = "你可以試著問我：\n1. 為什麼微血管壁這麼薄？\n2. 哪些粒子可以穿過管壁？\n3. 為什麼紅血球出不去？\n\nTry asking about: thickness, permeability, or RBCs!";
     }
 
-    function sendMessage() {
-        const input = document.getElementById('user-input');
-        const box = document.getElementById('chat-box');
-        const text = input.value.trim();
-        if(!text) return;
-
-        // User message
-        const userDiv = document.createElement('div');
-        userDiv.className = 'user-msg'; userDiv.innerText = text;
-        box.appendChild(userDiv);
-        input.value = '';
-
-        // AI Logic
+    // 延遲顯示 AI 回覆
+    setTimeout(() => {
         const aiDiv = document.createElement('div');
         aiDiv.className = 'ai-msg';
-        const lowText = text.toLowerCase();
-        
-        let reply = "";
-
-        // 問題 1: 為什麼微血管壁只有一層細胞的厚度？
-        if(lowText.includes('一層') || lowText.includes('厚度') || lowText.includes('thickness') || lowText.includes('one cell')) {
-            reply = "<b>關於微血管厚度：</b><br>因為微血管壁只有一層細胞厚，可以<b>縮短擴散距離</b>，從而增加物質交換的速度。<br><i>It shortens the diffusion distance and increases the rate of substance exchange.</i>";
-        }
-        // 問題 2: 為什麼紅血球不能離開？
-        else if(lowText.includes('紅血球') || lowText.includes('rbc') || lowText.includes('不能離開')) {
-            reply = "<b>關於紅血球：</b><br>1. <b>體積較大：</b>紅血球無法通過微血管壁。<br>2. <b>差異透性：</b>血管壁只容許細小分子（如水、葡萄糖）通過。<br>💡 若紅血球滲出，通常代表炎症或血管受損。";
-        }
-        // 問題 3 & 4: 哪些粒子能穿過/留在血管？
-        else if(lowText.includes('哪些粒子') || lowText.includes('哪些物質') || lowText.includes('particle')) {
-            reply = "<b>粒子篩選清單：</b><br>✅ <b>能穿過：</b>水分子、葡萄糖、氨基酸。<br>❌ <b>留在血管內：</b>血細胞（紅、白血球）、血漿蛋白。<br>這體現了血管壁的<b>差異透性 (Differential permeability)</b>。";
-        }
-        // 水腫相關
-        else if(lowText.includes('水腫') || lowText.includes('oedema')) {
-            reply = "<b>關於水腫：</b><br>當組織液生成過多或回收不足（例如血漿蛋白減少或淋巴管阻塞）時，水分積聚在細胞間隙就會形成水腫。你可以試試在模擬器調整到『運動』觀察 HP 上升的影響！";
-        }
-        else if(lowText.includes('淋巴') || lowText.includes('lymph')) {
-            reply = "<b>關於淋巴系統：</b><br>淋巴管（淺黃色管道）負責收集剩餘的組織液，並將其送回血液循環，防止組織水腫。";
-        }
-        else {
-            reply = "你可以試著問我：<br>1. 為什麼微血管只有一層細胞厚？<br>2. 哪些粒子能穿過微血管壁？<br>3. 為什麼紅血球不能離開血管？";
-        }
-
-        aiDiv.innerHTML = reply;
-        setTimeout(() => { 
-            box.appendChild(aiDiv); 
-            box.scrollTop = box.scrollHeight; 
-        }, 500);
-    }
-
-    updateCO(); beat(); animate();
+        aiDiv.innerText = reply;
+        box.appendChild(aiDiv);
+        box.scrollTop = box.scrollHeight;
+    }, 500);
+}
 </script>
 </body>
 </html>
