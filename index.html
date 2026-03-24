@@ -122,9 +122,9 @@
     <div class="section-card">
         <div class="part-header">第二部分：組織液形成 Tissue Fluid Formation</div>
         <div class="control-panel" style="background: #37474f;">
-            <div class="gauge-box"><span style="font-size: 0.7em;">動脈端 HP</span><span id="hp-entry" class="gauge-val">35</span></div>
-            <div class="gauge-box" style="border-color: #03a9f4;"><span style="font-size: 0.7em;">血漿滲透壓 OP</span><span class="gauge-val">25</span></div>
-            <div class="gauge-box"><span style="font-size: 0.7em;">靜脈端 HP</span><span id="hp-exit" class="gauge-val">15</span></div>
+            <div class="gauge-box"><span style="font-size: 0.7em;">動脈端 流體靜壓 hydrostatic pressure</span><span id="hp-entry" class="gauge-val">35</span></div>
+            <div class="gauge-box" style="border-color: #03a9f4;"><span style="font-size: 0.7em;">血漿滲透壓 Osmotic pressure</span><span class="gauge-val">25</span></div>
+            <div class="gauge-box"><span style="font-size: 0.7em;">靜脈端 流體靜壓 hydrostatic pressure</span><span id="hp-exit" class="gauge-val">15</span></div>
         </div>
         <div id="viewport-container">
             <div id="viewport">
@@ -151,7 +151,7 @@
 <div id="ai-chat-window">
     <div class="chat-header"><span>Bio-AI 自主學習助手</span><span style="cursor:pointer" onclick="toggleChat()">✖</span></div>
     <div class="chat-content" id="chat-box">
-        <div class="ai-msg">你好！你可以嘗試問我關於工作紙的問題，例如：<br>1. 為什麼微血管壁只有一層細胞？<br>2. 哪些粒子能穿過管壁？<br>3. 紅血球為什麼出不去？</div>
+        <div class="ai-msg">你好！你可以嘗試問我關於工作紙的問題，例如：<br>1. 為什麼微血管壁只有一層細胞？<br>2. 哪些粒子能穿過管壁？<br>3. 紅血細胞為什麼出不去？</div>
     </div>
     <div class="chat-input-area">
         <input type="text" id="user-input" placeholder="輸入問題..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -275,16 +275,16 @@
             reply = "💡 微血管壁只有一層細胞的厚度。這樣的好處是可以縮短擴散距離，從而增加物質交換的速率。";
         } 
         else if(msg.includes('紅血球') || msg.includes('rbc') || msg.includes('不能離開')) {
-            reply = "🔍 因為紅血球體積較大，無法通過微血管壁。微血管壁具有差異透性 (Differential permeability)，只容許細小分子通過。";
+            reply = "🔍 因為紅血細胞體積較大，無法通過微血管壁。微血管壁具有差異透性 (Differential permeability)，只容許細小分子通過。";
         } 
         else if(msg.includes('粒子') || msg.includes('穿過') || msg.includes('哪些')) {
-            reply = "🧪 能穿過微血管壁的包括：1. 水分子、2. 葡萄糖、3. 氨基酸。它們都是細小分子。";
+            reply = "🧪 能穿過微血管壁的分子包括：1. 水分子、2. 葡萄糖、3. 氨基酸。它們都是細小分子。";
         } 
         else if(msg.includes('留在血管') || msg.includes('血液中')) {
-            reply = "🩸 留在血管內的包括：1. 血細胞 (如紅血球)、2. 血漿蛋白。它們體積太大，無法通過。";
+            reply = "🩸 留在血管內的分子包括：1. 血細胞 (如紅血球)、2. 血漿蛋白。它們體積太大，無法通過。";
         }
         else if(msg.includes('運動') || msg.includes('exercise')) {
-            reply = "🏃 運動時心輸出量增加令靜水壓 (HP) 上昇。在動脈端，更多水分會被逼出形成組織液。";
+            reply = "🏃 運動時心輸出量增加令流體靜壓 (Hydrostatic Pressure) 上昇。在動脈端，更多水分會被逼出形成組織液。";
         }
         else {
             reply = "你可以試著問我關於：微血管厚度、差異透性、或者哪些粒子能穿過管壁。";
