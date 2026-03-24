@@ -2,33 +2,35 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>DSE Biology: Capillary Exchange & Lymphatic Simulator</title>
+    <title>DSE Biology: Integrated Cardiac & Tissue Fluid Lab</title>
     <style>
         :root {
             --artery: #ef5350; --vein: #42a5f5; --water: #00e5ff;
             --rbc: #c62828; --cell: #fff3e0; --nucleus: #a1887f;
             --panel: #263238; --heart-red: #d32f2f; --muscle-dark: #b71c1c; --vessel-gray: #9e9e9e;
             --glucose: #ffd54f; --amino: #81c784;
-            --lymph: #fff59d; 
             --ai-primary: #673ab7;
         }
         body { font-family: "PingFang TC", "Helvetica", sans-serif; background: #eceff1; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
-        #main-container { width: 1200px; display: flex; flex-direction: column; gap: 25px; }
+        #main-container { width: 1300px; display: flex; flex-direction: column; gap: 30px; }
         
-        .section-card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; position: relative; }
+        .section-card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 30px; position: relative; }
         .part-header { background: #455a64; color: white; display: inline-block; padding: 6px 20px; border-radius: 20px; font-weight: bold; margin-bottom: 15px; }
         
-        .control-panel { background: var(--panel); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; gap: 20px; align-items: center; }
-        .preset-group { display: flex; flex-direction: column; gap: 8px; padding-right: 15px; border-right: 1px solid rgba(255,255,255,0.2); }
-        .preset-btn { background: #546e7a; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; transition: 0.2s; }
+        .control-panel { background: var(--panel); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 25px; align-items: center; }
+        .preset-group { display: flex; flex-direction: column; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.2); }
+        .preset-btn { background: #546e7a; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: 0.2s; }
+        .preset-btn:hover { background: #78909c; }
         .preset-btn.active { background: #ffeb3b; color: #333; font-weight: bold; }
 
-        .gauge-box { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; flex: 1; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-        .gauge-val { font-size: 1.3em; font-weight: bold; color: #ffeb3b; display: block; }
+        .gauge-box { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; flex: 1; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        .gauge-val { font-size: 1.4em; font-weight: bold; color: #ffeb3b; display: block; }
 
-        #heart-viewport { height: 300px; display: flex; align-items: center; justify-content: center; background: #fdfdfd; border-radius: 12px; position: relative; }
-        #heart-svg { width: 200px; transition: transform 0.1s ease-out; }
+        #heart-viewport { height: 360px; display: flex; align-items: center; justify-content: center; background: #fdfdfd; border-radius: 12px; position: relative; }
+        #heart-svg { width: 240px; transition: transform 0.1s ease-out; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
         .heart-muscle { fill: var(--heart-red); stroke: var(--muscle-dark); stroke-width: 2.5; }
+        .vessels { fill: var(--vessel-gray); stroke: #616161; stroke-width: 1.2; }
+        .vessels-dark { fill: #757575; stroke: #424242; stroke-width: 1.2; }
         
         #viewport { position: relative; width: 100%; height: 450px; background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
         .cell-layer { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(6, 1fr); opacity: 0.2; pointer-events: none; }
@@ -40,106 +42,129 @@
         .rbc { background: var(--rbc); width: 20px; height: 20px; z-index: 25; box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4); }
         .mol { width: 6px; height: 6px; z-index: 10; }
         .water { background: var(--water); box-shadow: 0 0 4px var(--water); }
-        .glucose { background: var(--glucose); border-radius: 2px; }
-        .amino { background: var(--amino); }
-        .lymph-p { background: #fbc02d; box-shadow: 0 0 3px #fbc02d; }
+        .glucose { background: var(--glucose); border-radius: 2px; box-shadow: 0 0 4px var(--glucose); }
+        .amino { background: var(--amino); box-shadow: 0 0 4px var(--amino); }
 
-        .legend-bar { margin-top: 10px; display: flex; justify-content: center; gap: 20px; padding: 8px; background: #f8f9fa; border-radius: 8px; font-size: 0.8em; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-bar { margin-top: 15px; display: flex; justify-content: center; gap: 25px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.85em; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        /* AI Chatbot Styles */
-        #ai-button { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--ai-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px; }
-        #ai-chat-window { position: fixed; bottom: 90px; right: 25px; width: 320px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
-        .chat-header { background: var(--ai-primary); color: white; padding: 12px; font-weight: bold; display: flex; justify-content: space-between; }
-        .chat-content { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.85em; background: #f9f9f9; display: flex; flex-direction: column; }
+        #ai-button { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--ai-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px; transition: 0.3s; }
+        #ai-button:hover { transform: scale(1.1); }
+        
+        #ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd; }
+        .chat-header { background: var(--ai-primary); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chat-content { flex: 1; padding: 15px; overflow-y: auto; font-size: 0.9em; background: #f9f9f9; display: flex; flex-direction: column; }
         .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
         .chat-input-area input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        .ai-msg { background: #e1bee7; padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; align-self: flex-start; max-width: 85%; white-space: pre-wrap; }
-        .user-msg { background: #cfd8dc; padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; align-self: flex-end; max-width: 85%; }
+        .ai-msg { background: #e1bee7; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px; align-self: flex-start; max-width: 85%; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .user-msg { background: #cfd8dc; padding: 10px 14px; border-radius: 12px; margin-bottom: 12px; align-self: flex-end; max-width: 85%; margin-left: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div id="main-container">
     <div class="section-card">
-        <div class="part-header">第一部分：心臟調節與壓力產生 (Cardiac & Pressure)</div>
+        <div class="part-header">第一部分：心臟調節 Cardiac Regulation</div>
         <div id="heart-viewport">
             <svg id="heart-svg" viewBox="0 0 220 250">
-                <path class="heart-muscle" id="ventricle-body" d="M65,80 L145,80 C165,80 185,120 165,190 C150,240 105,250 105,250 C105,250 60,240 45,190 C25,120 45,80 65,80 Z" />
-                <text x="75" y="150" fill="white" font-size="12" font-weight="bold">Ventricle</text>
+                <path class="vessels-dark" d="M60,10 L80,10 Q90,30 80,60 L60,60 Z" />
+                <path class="vessels-dark" d="M150,70 Q170,60 180,80 L160,100 Z" opacity="0.6" />
+                <path class="vessels" d="M90,20 Q115,0 140,20 L140,80 L90,80 Z" /> 
+                <path class="vessels" d="M70,40 Q50,30 40,50 L60,95 L80,85 Z" /> 
+                <path id="ventricle-body" class="heart-muscle" d="M65,80 L145,80 C165,80 185,120 165,190 C150,240 105,250 105,250 C105,250 60,240 45,190 C25,120 45,80 65,80 Z" />
+                <path d="M65,80 Q105,65 145,80" fill="none" stroke="#b71c1c" stroke-width="3"/>
             </svg>
-            <div style="position: absolute; right: 30px; top: 30px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.9em;">
-                狀態 Status: <b id="heart-state" style="color: var(--heart-red);">舒張期 Diastole</b><br>
-                心輸出量 C.O.: <span id="co-val" style="font-weight: bold;">4.9</span> L/min
+            <div style="position: absolute; right: 50px; top: 50px; text-align: right; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; border: 1px solid #ddd;">
+                狀態 Status:<br> 
+                <b id="heart-state" style="color: var(--heart-red); font-size: 1.1em;">舒張期 Diastole</b><br><br>
+                心輸出量 Cardiac Output:<br>
+                <span id="co-val" style="font-weight: bold; font-size: 1.2em;">4.9</span> L/min
             </div>
         </div>
         <div class="control-panel">
             <div class="preset-group">
-                <button class="preset-btn active" onclick="setPreset(70, 70, this)">休息 Rest</button>
-                <button class="preset-btn" onclick="setPreset(140, 100, this)">運動 Exercise</button>
+                <button class="preset-btn" onclick="setPreset(70, 70, this)">休息 Rest</button>
+                <button class="preset-btn" onclick="setPreset(140, 110, this)">運動 Exercise</button>
             </div>
-            <div style="flex: 1.5;">
-                <label>心率 HR: <b id="hr-disp">70</b> bpm</label>
+            <div style="flex: 1;">
+                <label>心率 Heart Rate (HR): <b id="hr-disp">70</b> bpm</label>
                 <input type="range" id="hr-slider" min="40" max="180" value="70" style="width: 100%;">
             </div>
+            <div style="flex: 1;">
+                <label>心搏量 Stroke Volume (SV): <b id="sv-disp">70</b> ml</label>
+                <input type="range" id="sv-slider" min="30" max="150" value="70" style="width: 100%;">
+            </div>
             <div class="gauge-box" style="border-color: #ff5252;">
-                <span style="font-size: 0.7em;">動脈靜水壓 Arterial HP</span>
-                <span id="hp-entry" class="gauge-val">35</span>
+                <span style="font-size: 0.75em;">動脈血壓 Arterial BP</span>
+                <span id="bp-result" class="gauge-val">35</span>
             </div>
         </div>
     </div>
 
     <div class="section-card">
-        <div class="part-header">第二部分：物質交換與淋巴回收 (Exchange & Lymph)</div>
+        <div class="part-header">第二部分：組織液形成 Tissue Fluid Formation</div>
         <div class="control-panel" style="background: #37474f;">
-            <div class="gauge-box"><span style="font-size: 0.7em;">動脈端 HP</span><span id="hp-disp-left" class="gauge-val">35</span></div>
-            <div class="gauge-box" style="border-color: #03a9f4;"><span style="font-size: 0.7em;">血漿蛋白滲透效應 OP</span><span class="gauge-val">25</span></div>
-            <div class="gauge-box"><span style="font-size: 0.7em;">靜脈端 HP</span><span id="hp-disp-right" class="gauge-val">15</span></div>
+            <div class="gauge-box">
+                <span style="font-size: 0.75em;">動脈端靜水壓 Arterial HP</span>
+                <span id="hp-entry" class="gauge-val">35</span>
+            </div>
+            <div class="gauge-box" style="border-color: #03a9f4;">
+                <span style="font-size: 0.75em;">血漿滲透壓 Plasma Osmotic P</span>
+                <span class="gauge-val">25</span>
+            </div>
+            <div class="gauge-box">
+                <span style="font-size: 0.75em;">靜脈端靜水壓 Venous HP</span>
+                <span id="hp-exit" class="gauge-val">15</span>
+            </div>
         </div>
         <div id="viewport">
             <div class="cell-layer" id="cellLayer"></div>
-            <svg class="vessel-svg" viewBox="0 0 1200 450">
-                <path d="M100,420 L1100,420" stroke="rgba(255,245,157,0.6)" stroke-width="20" stroke-linecap="round" fill="none" />
-                <text x="110" y="440" fill="#fbc02d" font-size="12" font-weight="bold">淋巴管 Lymphatic Vessel</text>
-                <path id="path0" d="M0,225 L180,225 C350,50 850,50 1020,225 L1200,225" stroke="none" fill="none" />
-                <path id="path1" d="M0,225 L180,225 C350,140 850,140 1020,225 L1200,225" stroke="none" fill="none" />
-                <path id="path2" d="M0,225 L180,225 L1020,225 L1200,225" stroke="none" fill="none" />
-                <path id="path3" d="M0,225 L180,225 C350,310 850,310 1020,225 L1200,225" stroke="none" fill="none" />
-                <path id="path4" d="M0,225 L180,225 C350,400 850,400 1020,225 L1200,225" stroke="none" fill="none" />
+            <svg class="vessel-svg" viewBox="0 0 1240 450">
+                <path id="path0" d="M0,225 L180,225 C350,50 890,50 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
+                <path id="path1" d="M0,225 L180,225 C350,140 890,140 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
+                <path id="path2" d="M0,225 L180,225 L1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
+                <path id="path3" d="M0,225 L180,225 C350,310 890,310 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
+                <path id="path4" d="M0,225 L180,225 C350,400 890,400 1060,225 L1240,225" stroke="rgba(211,47,47,0.05)" stroke-width="24" fill="none" />
             </svg>
         </div>
         <div class="legend-bar">
-            <div class="legend-item"><div class="dot" style="background:var(--rbc);"></div> 紅血球 RBC</div>
+            <div class="legend-item"><div class="dot" style="background:var(--rbc); width:14px; height:14px;"></div> 紅血球 RBC</div>
             <div class="legend-item"><div class="dot" style="background:var(--water);"></div> 水分子 Water</div>
-            <div class="legend-item"><div class="dot" style="background:var(--glucose);"></div> 葡萄糖 Glucose</div>
-            <div class="legend-item"><div class="dot" style="background:#fbc02d;"></div> 淋巴液 Lymph</div>
+            <div class="legend-item"><div class="dot" style="background:var(--glucose); border-radius:2px;"></div> 葡萄糖 Glucose</div>
+            <div class="legend-item"><div class="dot" style="background:var(--amino);"></div> 氨基酸 Amino acid</div>
         </div>
     </div>
 </div>
 
 <div id="ai-button" onclick="toggleChat()">🤖</div>
 <div id="ai-chat-window">
-    <div class="chat-header"><span>Bio-AI 助手 (HKDSE 版)</span><span onclick="toggleChat()" style="cursor:pointer">✖</span></div>
+    <div class="chat-header">
+        <span>Bio-AI 自主學習助手</span>
+        <span style="cursor:pointer" onclick="toggleChat()">✖</span>
+    </div>
     <div class="chat-content" id="chat-box">
-        <div class="ai-msg">你好！我是 AI 助手。你可以問我關於工作紙的問題，例如：<br>1. 為什麼微血管壁這麼薄？<br>2. 哪些粒子可以穿過管壁？<br>3. 為什麼紅血球出不去？</div>
+        <div class="ai-msg">你好！我是你的生物科學習助手。你可以嘗試問我關於工作紙的問題，例如：<br>1. 為什麼微血管壁只有一層細胞？<br>2. 哪些粒子能穿過管壁？<br>3. 紅血球為什麼出不去？</div>
     </div>
     <div class="chat-input-area">
-        <input type="text" id="user-input" placeholder="輸入關鍵字 (如：厚度, 滲透)..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <input type="text" id="user-input" placeholder="輸入關於微血管或組織液的問題..." onkeypress="if(event.key==='Enter') sendMessage()">
         <button onclick="sendMessage()" style="background:var(--ai-primary); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">發送</button>
     </div>
 </div>
 
 <script>
-    // --- 心臟邏輯 ---
+    // --- 核心模擬器邏輯 (保持不變) ---
     let hr = 70, sv = 70, arteryHP = 35;
+    const heartSvg = document.getElementById('heart-svg');
     const heartBody = document.getElementById('ventricle-body');
     const heartStateTxt = document.getElementById('heart-state');
     
     function setPreset(newHr, newSv, btn) {
         hr = newHr; sv = newSv;
         document.getElementById('hr-slider').value = hr;
+        document.getElementById('sv-slider').value = sv;
         document.getElementById('hr-disp').innerText = hr;
+        document.getElementById('sv-disp').innerText = sv;
         document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         updateCO();
@@ -148,32 +173,45 @@
     function updateCO() {
         let co = (hr * sv) / 1000;
         document.getElementById('co-val').innerText = co.toFixed(1);
-        let calcHP = Math.round((co / 4.9) * 35);
-        arteryHP = Math.min(65, Math.max(15, calcHP));
-        document.getElementById('hp-entry').innerText = arteryHP;
-        document.getElementById('hp-disp-left').innerText = arteryHP;
-        document.getElementById('hp-disp-right').innerText = Math.max(10, arteryHP - 20);
+        let calculatedBP = Math.round((co / 4.9) * 35);
+        calculatedBP = Math.min(65, Math.max(15, calculatedBP));
+        document.getElementById('bp-result').innerText = calculatedBP;
+        document.getElementById('hp-entry').innerText = calculatedBP;
+        document.getElementById('hp-exit').innerText = Math.max(10, calculatedBP - 20);
+        arteryHP = calculatedBP;
     }
 
     function beat() {
         let cycle = 60000 / hr;
-        heartBody.style.transition = "d 0.12s ease-in-out";
+        heartBody.style.transition = "d 0.12s cubic-bezier(0.4, 0, 0.2, 1)";
         heartBody.setAttribute('d', `M78,80 L132,80 C145,80 160,120 150,190 C140,220 105,235 105,235 C105,235 70,220 60,190 C50,120 65,80 78,80 Z`);
-        heartStateTxt.innerText = "收縮期 Systole";
+        heartSvg.style.transform = "scale(0.96) translateY(5px)";
+        heartStateTxt.innerHTML = "收縮期<br>Systole";
+        heartStateTxt.style.color = "#d32f2f";
         setTimeout(() => {
             heartBody.setAttribute('d', `M65,80 L145,80 C165,80 185,120 165,190 C150,240 105,250 105,250 C105,250 60,240 45,190 C25,120 45,80 65,80 Z`);
-            heartStateTxt.innerText = "舒張期 Diastole";
-        }, cycle * 0.3);
+            heartSvg.style.transform = "scale(1) translateY(0px)";
+            heartStateTxt.innerHTML = "舒張期<br>Diastole";
+            heartStateTxt.style.color = "#455a64";
+        }, cycle * 0.35);
         setTimeout(beat, cycle);
     }
 
-    document.getElementById('hr-slider').oninput = function() { hr=this.value; document.getElementById('hr-disp').innerText=hr; updateCO(); };
+    document.getElementById('hr-slider').oninput = function() { 
+        hr=this.value; document.getElementById('hr-disp').innerText=hr; 
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        updateCO(); 
+    };
+    document.getElementById('sv-slider').oninput = function() { 
+        sv=this.value; document.getElementById('sv-disp').innerText=sv; 
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        updateCO(); 
+    };
 
-    // --- 微血管與淋巴模擬 ---
     const viewport = document.getElementById('viewport');
     const paths = [0,1,2,3,4].map(i => document.getElementById('path'+i));
     let particles = [];
-    for(let i=0; i<72; i++) {
+    for(let i=0; i<84; i++) {
         const c = document.createElement('div'); c.className = 'cell';
         c.innerHTML = '<div class="nucleus"></div>';
         document.getElementById('cellLayer').appendChild(c);
@@ -184,81 +222,91 @@
         const el = document.createElement('div'); el.className = `p ${type}`;
         if (type !== 'rbc') el.classList.add('mol');
         viewport.appendChild(el);
-        return { el, type, pIdx, progress: 0, exited: false, inLymph: false, drift: 0, side: Math.random() > 0.5 ? 1 : -1 };
+        return { el, type, pIdx, progress: 0, exited: false, drift: 0, side: Math.random() > 0.5 ? 1 : -1 };
     }
 
     function animate() {
-        if (Math.random() > 0.97) particles.push(createP('rbc'));
-        if (Math.random() > 0.4) {
+        if (Math.random() > 0.96) particles.push(createP('rbc'));
+        if (Math.random() > 0.35) {
             let r = Math.random();
-            particles.push(createP(r < 0.7 ? 'water' : (r < 0.9 ? 'glucose' : 'amino')));
+            let type = r < 0.7 ? 'water' : (r < 0.88 ? 'glucose' : 'amino');
+            particles.push(createP(type));
         }
-
         particles.forEach((p, i) => {
-            if (p.inLymph) {
-                let curX = parseFloat(p.el.style.left) || 100;
-                let nextX = curX + 1.2;
-                p.el.style.left = nextX + 'px'; p.el.style.top = '420px';
-                if (nextX > 1150) { p.el.remove(); particles.splice(i, 1); }
-                return;
-            }
-
             let localHP = arteryHP - (p.progress * 20);
-            p.progress += 0.0025 * (arteryHP/35);
+            p.progress += (p.progress < 0.15) ? 0.006 * (arteryHP/35) : (p.progress > 0.85 ? 0.004 : 0.0018);
             const pt = paths[p.pIdx].getPointAtLength(p.progress * paths[p.pIdx].getTotalLength());
             let x = pt.x, y = pt.y;
-
             if (p.type !== 'rbc') {
-                if (p.progress > 0.2 && p.progress < 0.45 && !p.exited && Math.random() < ((localHP-25)*0.02)) p.exited = true;
+                if (p.progress > 0.2 && p.progress < 0.45 && !p.exited && Math.random() < ((localHP-25)*0.015)) p.exited = true;
+                if (p.exited && p.progress > 0.75) {
+                    p.drift *= 0.85; if (Math.abs(p.drift) < 1.5) p.exited = false;
+                }
                 if (p.exited) {
-                    p.drift = Math.min(p.drift + 1.5, 80);
+                    if (p.progress < 0.65) p.drift = Math.min(p.drift + (localHP/7), 90);
                     y += p.drift * p.side;
-                    if (y > 405 && p.side === 1 && p.type === 'water' && Math.random() < 0.1) {
-                        p.inLymph = true; p.el.classList.add('lymph-p');
-                    }
-                    if (p.progress > 0.75 && !p.inLymph) { p.drift *= 0.9; if(p.drift < 2) p.exited = false; }
                 }
             }
-            if(!p.inLymph) { p.el.style.left = x + 'px'; p.el.style.top = y + 'px'; }
+            p.el.style.left = x + 'px'; p.el.style.top = y + 'px';
             if (p.progress >= 1) { p.el.remove(); particles.splice(i, 1); }
         });
         requestAnimationFrame(animate);
     }
 
-    // --- AI Chatbot 邏輯 ---
-    function toggleChat() { const c = document.getElementById('ai-chat-window'); c.style.display = (c.style.display==='flex'?'none':'flex'); }
-    
+    // --- 修改後的 AI Chatbot 邏輯 (配合工作紙與引導學習) ---
+    function toggleChat() {
+        const win = document.getElementById('ai-chat-window');
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    }
+
     function sendMessage() {
         const input = document.getElementById('user-input');
         const box = document.getElementById('chat-box');
-        const userText = input.value.trim().toLowerCase();
-        if(!userText) return;
+        const userMsg = input.value.trim();
+        if(!userMsg) return;
 
+        // 顯示用戶訊息
         const userDiv = document.createElement('div');
-        userDiv.className = 'user-msg'; userDiv.innerText = input.value;
+        userDiv.className = 'user-msg';
+        userDiv.innerText = userMsg;
         box.appendChild(userDiv);
-        input.value = '';
-
-        let reply = "你可以嘗試問我：\n1. 為什麼微血管壁這麼薄？\n2. 哪些粒子可以穿過管壁？\n3. 為什麼紅血球出不去？";
         
-        if (userText.includes('一層') || userText.includes('薄') || userText.includes('厚度') || userText.includes('thickness')) {
-            reply = "💡 微血管壁只有「一層細胞厚度」，這可以「縮短擴散距離」，從而「增加物質交換的速率」。這是 DSE 的標準答案喔！";
-        } else if (userText.includes('紅血球') || userText.includes('不能離開') || userText.includes('rbc')) {
-            reply = "🔍 因為紅血球的「體積較大」，無法通過微血管壁的孔隙。微血管壁具有「差異透性」，只容許細小分子通過。";
-        } else if (userText.includes('哪些粒子') || userText.includes('穿過') || userText.includes('pass through')) {
-            reply = "🧪 根據模擬器，細小分子如「水分子」、「葡萄糖」及「氨基酸」都能穿過管壁。而紅血球和血漿蛋白則留在血管內。";
-        } else if (userText.includes('留在血管') || userText.includes('stay inside')) {
-            reply = "🩸 「紅血球」和「血漿蛋白」會留在血管內。血漿蛋白產生的「滲透效應」對靜脈端回收水分至關重要。";
-        } else if (userText.includes('淋巴') || userText.includes('lymph')) {
-            reply = "🟡 並非所有組織液都能回流血管。剩餘的液體會進入「淋巴管」，最後才回流至血液循環系統。";
+        const msg = userMsg.toLowerCase();
+        let reply = "";
+
+        // 引導學習邏輯
+        if(msg.includes('一層') || msg.includes('細胞') || msg.includes('厚度') || msg.includes('thickness') || msg.includes('thin')) {
+            reply = "💡 **關於微血管壁的厚度：**\n微血管壁只有**一層細胞的厚度**。這樣的好處是可以**縮短擴散距離**，從而**增加物質交換的速率**。";
+        } 
+        else if(msg.includes('紅血球') || msg.includes('rbc') || msg.includes('不能離開') || msg.includes('出去')) {
+            reply = "🔍 **關於紅血球留在血管的原因：**\n這是因為紅血球**體積較大**，無法通過微血管壁。微血管壁具有**差異透性 (Differential permeability)**，只容許細小分子（如水和葡萄糖）通過。\n\n*備註：若紅血球能穿出，通常代表血管受損或有炎症。*";
+        } 
+        else if(msg.includes('粒子') || msg.includes('穿過') || msg.includes('pass through') || msg.includes('進入組織液')) {
+            reply = "🧪 **能穿過微血管壁的粒子包括：**\n1. **水分子 (Water)**\n2. **葡萄糖 (Glucose)**\n3. **氨基酸 (Amino acids)**\n這些都是細小分子，能透過擴散或滲透通過。";
+        } 
+        else if(msg.includes('留在血管') || msg.includes('stay inside') || msg.includes('蛋白質') || msg.includes('protein')) {
+            reply = "🩸 **留在血管內的物質包括：**\n1. **血細胞** (如紅血球、白血球)\n2. **血漿蛋白** (Plasma proteins)\n這些物質體積較大，無法通過微血管壁。";
+        }
+        else if(msg.includes('運動') || msg.includes('exercise')) {
+            reply = "🏃 **運動時的變化：**\n當你調高心率時，心輸出量增加令**靜水壓 (HP)** 上升。在動脈端，更多的水分會被「逼出」血管形成組織液，這就是為什麼運動時肌肉會感到腫脹。";
+        }
+        else if(msg.includes('靜水壓') || msg.includes('滲透壓') || msg.includes('pressure')) {
+            reply = "⚖️ **壓力的平衡：**\n1. **靜水壓 (HP)**：心臟泵血產生，負責把水「逼出」血管。\n2. **血漿滲透壓 (OP)**：血漿蛋白產生，負責把水「吸回」血管。\n在動脈端 HP > OP，所以形成組織液。";
+        }
+        else {
+            reply = "這是一個有趣的生物學問題！你可以試著問我：\n- 為什麼微血管壁只有一層細胞？\n- 哪些物質能穿過管壁？\n- 為什麼紅血球不能離開血管？";
         }
 
+        // 模擬 AI 思考後回覆
         setTimeout(() => {
             const aiDiv = document.createElement('div');
-            aiDiv.className = 'ai-msg'; aiDiv.innerText = reply;
+            aiDiv.className = 'ai-msg';
+            aiDiv.innerText = reply;
             box.appendChild(aiDiv);
             box.scrollTop = box.scrollHeight;
         }, 500);
+
+        input.value = '';
     }
 
     updateCO(); beat(); animate();
